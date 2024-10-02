@@ -1,5 +1,5 @@
 ## Warning!
-I'm remaking this app to work with latest Fall Guys updates. The current version of img2FGC by [@repinek](https://github.com/repinek) may not work right now!
+I'm remaking this app to work with latest Fall Guys Updates and this remake is still in progress. The current version of img2FGC by [@repinek](https://github.com/repinek) may not work right now.
 
 # ImgToFGC
 Convert image to Fall Guys Creative Level! <br>
