@@ -1,445 +1,295 @@
 from PIL import Image
+from rich import print
+import platform
 import webcolors
+import argparse
 import json
 import uuid
 import time
 import os
-from colorama import Fore, Style
-import getpass
 
-user_name = getpass.getuser()
-
-file_path_output = "C:\\Users\\" + user_name + "\\AppData\\LocalLow\\Mediatonic\\FallGuys_client\\output.txt"
-FGC_json = "C:\\Users\\" + user_name + "\\AppData\\LocalLow\\Mediatonic\\FallGuys_client\\Img2FGC.json"
-
-# reading output.txt by mod
-try:
-    with open(file_path_output, "r", encoding="utf-8") as f1:
-        lines = f1.readlines()
-except FileNotFoundError:
-    print(Fore.LIGHTRED_EX + "Unable to find file " + Style.RESET_ALL + ", try again\n")
-    os.system("pause")
-    exit()
-
-for line in lines:
-    try:
-        line = line.strip()
-        key, value = line.split(' = ')
-        if key == 'path_to_file':
-            image_input = value
-        elif key == 'width':
-            width_input = value
-        elif key == 'height':
-            height_input = value
-        elif key == 'shouldDeleteBlackPixels':
-            shouldDeleteBlackPixels = value.lower()
-        elif key == 'shouldDeleteWhitePixels':
-            shouldDeleteWhitePixels = value.lower()
-        elif key == 'isDigital':
-            isDigital = value.lower() # I know there are better ways to do this, but I'm lazy
-    except FileNotFoundError:
-        print(Fore.LIGHTRED_EX + "Unable to find file" + Style.RESET_ALL + ", try again\n")
-        os.system("pause")
-        exit()
-    except Exception as e:
-        print(f"Looks like file " + Fore.LIGHTRED_EX + " is corrupted" + Style.RESET_ALL + ", try again, if you can't fix this error by yourself tell " + Fore.LIGHTYELLOW_EX + "repinek about this, " + Style.RESET_ALL + "{e}, {e.__traceback__.tb_lineno}\n")
-        os.system("pause")
-        exit()
-
-if shouldDeleteWhitePixels == "false":
-    white_yes_or_no = "no"
-elif shouldDeleteWhitePixels == "true":
-    white_yes_or_no = "yes"
+if platform.system() == 'Windows':
+    pass
 else:
-    print("Something went wrong, report about this to " + Fore.LIGHTYELLOW_EX + " repinek" + Style.RESET_ALL + ", 49\n")
-    os.system("pause")
-    exit()
-if shouldDeleteBlackPixels == "false":
-    black_yes_or_no = "no"
-elif shouldDeleteBlackPixels == "true":
-    black_yes_or_no = "yes"
+    print('Windows is the only supported OS for this mod')
+    os.system('pause')
+    exit(1)
+
+type_of_kek = dict
+type_of_data = dict
+argparser = argparse.ArgumentParser(prog='img2FGC',
+                                    description='Convert image to Fall Guys Creative Level!',
+                                    exit_on_error=False)
+argparser.add_argument('--path-to-file',               required=True, type=str, default='example.png')
+argparser.add_argument('--width',                     required=True, type=int)
+argparser.add_argument('--height',                    required=True, type=int)
+argparser.add_argument('--isDigital',                required=False, type=bool, default=False)
+argparser.add_argument('--shouldDeleteBlackPixels',  required=False, type=bool, default=False)
+argparser.add_argument('--shouldDeleteWhitePixels',  required=False, type=bool, default=False)
+
+
+print('[light_cyan3]NOTE: Although I don’t believe that you can get[/light_cyan3] [red3]banned[/red3] [light_cyan3]for this, but[/light_cyan3] [light_green]be careful![/light_green] [red3]Don\'t use this script if you want to import NSFW or if you are stupid[/red3]\n\n'
+
+      'You cannot save maps larger than [red3]2MB[/red3] [light_green](around 700 pixels)[/light_green]\n'
+      '[light_green]1000 pixels[/light_green] are generated in ~[light_green]1 second[/light_green]\n\n'
+
+      'Script created by [light_yellow3]repinek[/light_yellow3] ([light_yellow3]@repinek[/light_yellow3] in [light_cyan3]tg/ds[/light_cyan3], [light_yellow3]@repinek840[/light_yellow3] in X), and thanks [light_green]FloyzI[/light_green] for help\n'  # type: ignore
+      '       updated by [light_yellow3] Loamfy[/light_yellow3] ([light_yellow3]loamfy[/light_yellow3] in [light_cyan3]Discord[/light_cyan3])')
+
+
+appdata_fg = os.path.join(os.environ['LOCALAPPDATA'] + 'Low', 'Mediatonic', 'FallGuys_client')
+if os.path.exists(appdata_fg):
+    pass
 else:
-    print("Something went wrong, report about this to " + Fore.LIGHTYELLOW_EX + " repinek" + Style.RESET_ALL + ", 57\n")
-    os.system("pause")
-    exit()
+    appdata_fg = os.path.join(os.path.expanduser('~'),  # if user changed LOCALAPPDATA variable
+                              'AppData',
+                              'LocalLow',
+                              'Mediatonic',
+                              'FallGuys_client')
 
-if isDigital == "false":
-    theme = "original"
-elif isDigital == "true":
-    theme = "digital"
-else:
-    print("Something went wrong, report about this to " + Fore.LIGHTYELLOW_EX + " repinek" + Style.RESET_ALL + ", 66\n")
-    os.system("pause")
-    exit()
+file_path_output = os.path.join(appdata_fg, 'output.txt')
+FGC_json = os.path.join(appdata_fg, 'Img2FGC.json')
 
-print(Fore.LIGHTCYAN_EX + "NOTE: Although I don’t believe that you can get " + Fore.LIGHTRED_EX + "banned " + Fore.LIGHTCYAN_EX + "for this, but " + Fore.LIGHTGREEN_EX + "be careful!"+ Fore.LIGHTRED_EX + " Don't use this script if you want to import NSFW or if you are stupid\n\n" +
-      Style.RESET_ALL + "You cannot save maps larger than " + Fore.LIGHTRED_EX + "2MB" + Fore.LIGHTGREEN_EX + " (around 700 pixels)\n" +
-      Fore.LIGHTGREEN_EX + "1000 pixels" + Style.RESET_ALL + " are generated in ~" + Fore.LIGHTGREEN_EX + " one second\n\n" +
-      Style.RESET_ALL + "Script created by " + Fore.LIGHTYELLOW_EX + "repinek" + Style.RESET_ALL + " (" + Fore.LIGHTYELLOW_EX + "@repinek " + Style.RESET_ALL + "in " + Fore.LIGHTCYAN_EX + "tg/ds" + Style.RESET_ALL + ", " + Fore.LIGHTYELLOW_EX + "@repinek840" + Style.RESET_ALL + " in X), and thanks " + Fore.LIGHTGREEN_EX + "FloyzI " + Style.RESET_ALL + "for help\n") # добавить про кал с долгой герекой
-try:
-    print(Fore.LIGHTGREEN_EX + "config:\n" + Style.RESET_ALL +
-      f"path: {image_input}\n"
-      f"width: {width_input}\n"
-      f"height: {height_input}\n"
-      f"delete white: {white_yes_or_no}, black: {black_yes_or_no}\n"
-      f"theme: {theme}")
-except Exception as e:
-    print(f"send this to repinek. {e.__traceback__.tb_lineno}, {e}\n")
-    os.system("pause")
-    exit()
 
-try:
-    image = Image.open(image_input)
-    image = image.transpose(method=Image.FLIP_LEFT_RIGHT)
-except OSError:
-    print("didnt found image with path", image_input + "\n")
-    os.system("pause")
-    exit()
-except Exception as e:
-    print(f"send this to repinek. {e.__traceback__.tb_lineno}, {e}\n")
-    os.system("pause")
-    exit()
+class Img2FGC:
+    def __init__(self):
+        self.pixels: list[dict[str, str | int | list[float]]] = []
+        self._init()
 
-# checking
-width, height = image.size
-try:
-    width_input_int = int(width_input)
-except TypeError:
-    print("Width should be as number\n")
-    os.system("pause")
-    exit()
-except Exception as e:
-    print(f"Report about this to repinek. {e.__traceback__.tb_lineno}, {e}\n")
-    os.system("pause")
-    exit()
-try:
-    height_input_int = int(height_input)
-except TypeError:
-    print("Height should be as number\n")
-    os.system("pause")
-    exit()
-except Exception as e:
-    print(f"Report about this to repinek. {e.__traceback__.tb_lineno}, {e}\n")
-    os.system("pause")
-    exit()
+    @staticmethod
+    def __on_error(message: str) -> None:
+        print(message)
+        os.system('pause')
+        exit(1)
 
-if width_input_int > width:
-    print("Width can't be more than image width\n")
-    os.system("pause")
-    exit()
-elif height_input_int > height:
-    print("Height can't be more than image height\n")
-    os.system("pause")
-    exit()
-try:
-    image = image.resize((width_input_int, height_input_int))
-except Exception as e:
-    print(f"Report about this to repinek. {e.__traceback__.tb_lineno}, {e}\n")
-    os.system("pause")
-    exit()
+    def _init(self):
+        self.args = argparser.parse_args()
+        try:
+            print('[light_green]Config[/light_green:\n'
+                  f'path: {self.args.path_to_file}\n'
+                  f'width: {self.args.width}\n'
+                  f'height: {self.args.height}\n'
+                  f'delete white: {self.args.shouldDeleteWhitePixels}, black: {self.args.shouldDeleteBlackPixels}\n'
+                  f'theme: {self.args.isDigital}')
+            self.path_to_file = self.args.path_to_file
+            self.width = self.args.width
+            self.height = self.args.height
+            self.shouldDeleteWhitePixels = self.args.shouldDeleteWhitePixels
+            self.shouldDeleteBlackPixels = self.args.shouldDeleteBlackPixels
+            self.isDigital = self.args.isDigital
+            self.template = kek
+        except Exception as e:
+            self.__on_error(f'Send this to Loamfy: {e.__traceback__.tb_lineno}, {e}\n')
 
-# white_yes_or_no = input("delete all white pixels? ('yes' or 'no'): ")
-# black_yes_or_no = input("delete all black pixels? ('yes' or 'no'): ")
-# ↑ old code
+    def _prepare_json(self) -> dict[str, str | int | list[float]]:
+        if self.isDigital:
+            kek['Level Theme ID'] = 'THEME_RETRO'
+            kek['SkyboxId'] = 'Retro_Skybox'
+        return kek
 
-print("After" + Fore.LIGHTGREEN_EX + " 5 seconds " + Style.RESET_ALL + "map should start generating, you will see some debug info (BETA)\n"
-"If you get some errors report about them to repinek, thanks")
-time.sleep(5)
+    def finish(self):
+        self.template['Floors'] = self.pixels
+        self.finished_json = self.template
+        with open(FGC_json, 'a') as f:
 
-a = "no alpha"
-width, height = image.size # again (sigma)
-rgb_colors = []
-# default colors
-real_colors = {
-    "original": {
-        "aqua": 4,
-        "gray": 18,
-        "silver": 17,
-        "navy": 12,
-        "black": 19,
-        "green": 13,
-        "teal": 10,
-        "olive": 9,
-        "blue": 12,
-        "lime": 13,
-        "white": 16,
-        "purple": 14,
-        "fuchsia": 1,
-        "maroon": 11,
-        "yellow": 2,
-        "red": 11,
-        "cyan": -1,
-        "orange": 8
-    },
-    "digital": {
-        "aqua": 3,
-        "gray": 4,
-        "silver": 8,
-        "navy": -1,
-        "black": 4,
-        "green": 3,
-        "teal": 5,
-        "olive": 9,
-        "blue": -1,
-        "lime": 3,
-        "white": 15,
-        "purple": 12,
-        "fuchsia": 2,
-        "maroon": 14,
-        "yellow": 6,
-        "red": 14,
-        "cyan": 3,
-        "orange": 13
-    }
-}
-colors_json = "\\BepInEx\\plugins\\FallGuysTools\\Assets\\colors.json"
-cwd = os.getcwd()
-full_path_tolko_u_menya = cwd + colors_json
-# colors check
-try:
-    with open(full_path_tolko_u_menya, 'r', encoding='utf-8') as file_kek:
-        data = json.load(file_kek) # im a furry btw
-except FileNotFoundError:
-    print(Fore.LIGHTRED_EX + f"Unable to find colors.json " + Style.RESET_ALL + f", a new colors.json will be generated by this path {full_path_tolko_u_menya} with " + Fore.LIGHTGREEN_EX + f"recommended colors" + Style.RESET_ALL)
-    with open(full_path_tolko_u_menya, 'w') as f2:
-        json.dump(real_colors, f2)
-        data = real_colors
-except Exception as e:
-    print(f"Report about this to repinek. {e.__traceback__.tb_lineno}, {e}")
-    os.system("pause")
-    exit()
+    def _resize_image(self) -> Image:
+        try:
+            image_file = Image.open(self.path_to_file)
+            image = image_file.transpose(method=Image.Transpose.FLIP_LEFT_RIGHT)
+        except OSError:
+            self.__on_error(f'Didn\'t found image with path {self.path_to_file}\n')
+        except Exception as e:
+            self.__on_error(f'Send this to Loamfy: {e.__traceback__.tb_lineno}, {e}\n')
 
-# colors
-colors_original = {
-    "aqua": data["original"]["aqua"],
-    "gray": data["original"]["gray"], # -1
-    "silver": data["original"]["silver"], # -1
-    "navy": data["original"]["navy"],
-    "black": data["original"]["black"],
-    "green": data["original"]["green"],
-    "teal": data["original"]["teal"],
-    "olive": data["original"]["olive"],
-    "blue": data["original"]["blue"],
-    "lime": data["original"]["lime"],
-    "white": data["original"]["white"],
-    "purple": data["original"]["purple"],
-    "fuchsia": data["original"]["fuchsia"],
-    "maroon": data["original"]["maroon"],
-    "yellow": data["original"]["yellow"],
-    "red": data["original"]["red"],
-    "cyan": data["original"]["cyan"],
-    "orange": data["original"]["orange"],
-    "teal": data["original"]["teal"]
-}
-colors_digital = {
-    "aqua": data["digital"]["aqua"],
-    "gray": data["digital"]["gray"], # -1
-    "silver": data["digital"]["silver"], # -1
-    "navy": data["digital"]["navy"],
-    "black": data["digital"]["black"],
-    "green": data["digital"]["green"],
-    "teal": data["digital"]["teal"],
-    "olive": data["digital"]["olive"],
-    "blue": data["digital"]["blue"],
-    "lime": data["digital"]["lime"],
-    "white": data["digital"]["white"],
-    "purple": data["digital"]["purple"],
-    "fuchsia": data["digital"]["fuchsia"],
-    "maroon": data["digital"]["maroon"],
-    "yellow": data["digital"]["yellow"],
-    "red": data["digital"]["red"],
-    "cyan": data["digital"]["cyan"],
-    "orange": data["digital"]["orange"],
-    "teal": data["digital"]["teal"]
-}
-# id number for object
-id_number = -1
+        # checking
+        width, height = image.size
+
+        if self.width > width:
+            self.__on_error('Width can\'t be more than image width\n')
+        elif self.width > height:
+            self.__on_error('Height can\'t be more than image height\n')
+
+        try:
+            return image.resize((self.width, self.height))
+        except Exception as e:
+            self.__on_error(f'Report about this to Loamfy: {e.__traceback__.tb_lineno}, {e}\n')
+
+    def _put_pixel(self, hex_value: str, x_y: tuple[int, int]) -> dict[str, str | int | list[float]]:
+        global id_number
+        id_number = id_number - 1
+        data['ID'] = id_number
+        data['Position'][0] = x_y[0] * 4.075
+        data['Position'][2] = x_y[1] * 4.075
+        data['ColourHexCode'] = hex_value
+        data['ColourPaletteID'] = 'Vanilla'
+        if self.isDigital:
+            data['Name'] = 'Placeable_Floor_Soft_Retro(Clone)'
+            data['ColourPaletteID'] = 'Retro'
+        random_key = uuid.uuid4()
+        random_key2 = uuid.uuid4()
+        formatted_key = str(random_key).replace('-', '')
+        formatted_key2 = str(random_key2).replace('-', '')
+        self.guids_sss = f'{formatted_key2[:8]}-{formatted_key2[8:12]}-{formatted_key2[12:16]}-{formatted_key2[16:20]}-{formatted_key2[20:]}'
+        self.variant_guid = f'{formatted_key[:8]}-{formatted_key[8:12]}-{formatted_key[12:16]}-{formatted_key[16:20]}-{formatted_key[20:]}'
+        data['GUIDs'] = self.guids_sss
+        data['VariantGuid'] = self.variant_guid
+        return data
+
+    def _configure_pixels(self, resized_image: Image.Image) -> None:
+        # every pixel
+        for x in range(self.width):
+            for y in range(self.height):
+                pixel = resized_image.getpixel((x, y))  # get pixel rgb
+                r, g, b = pixel[:3]  # fix alpha
+
+                try:
+                    a = pixel[3]
+                except IndexError:
+                    a = 1
+
+                actual_name, closest_name = closest_colour((r, g, b))
+                closest_value = rgb_to_hex(pixel)
+                if self.shouldDeleteWhitePixels and closest_name == 'white':
+                    print('skip')
+                    continue
+                elif self.shouldDeleteBlackPixels and closest_name == 'black':
+                    print('skip')
+                    continue
+                else:
+                    try:
+                        if a > 0:  # alpha is above 0
+                            self.pixels.append(self._put_pixel(closest_value, (x, y)))
+                        else:
+                            print('Alpha is 0, unable to set pixel')
+                            continue
+                    except Exception as e:
+                        print(f'Report about this to Loamfy: {e.__traceback__.tb_lineno}, {e}')
+                    posx = x * 4.075
+                    posy = y * 4.075
+                    print(
+                        f'RGB: {pixel}, alpha: {a}, color name: {closest_name}, color index: {closest_value}, object ID: {id_number}, POS X: {posx}, POS Y: {posy}, VatirantGuid: {self.variant_guid}, GUIDs: {self.guids_sss}')
+
+    def start(self):
+        print(
+            'After [light_green]5 seconds[/light_green] map should start generating, you will see some debug info (BETA)\n'
+            'If you get some errors report about them to Loamfy, thanks')
+        time.sleep(5)
+        self._configure_pixels(self._resize_image())
+        self.finish()
+
+
+
+
+    def _init2(self) -> None:
+        # reading output.txt by mod
+        try:
+            with open(file_path_output, 'r', encoding='utf-8') as f1:
+                self.lines = f1.readlines()
+        except FileNotFoundError:
+            self.__on_error('[light_red]Unable to find file [/light_red], try again\n')
+
+        for line in self.lines:
+            try:
+                line = line.strip()
+                key, value = line.split(' = ')
+                match key:  # use switch-case to have faster experience (from python 3.10)
+                    case 'path_to_file':
+                        self.image_input = value
+                    case 'width':
+                        self.width_input = value
+                    case 'height':
+                        self.height_input = value
+                    case 'shouldDeleteBlackPixels':
+                        self.shouldDeleteBlackPixels = value.lower()
+                    case 'shouldDeleteWhitePixels':
+                        self.shouldDeleteWhitePixels = value.lower()
+                    case 'isDigital':
+                        self.isDigital = value.lower()
+            except FileNotFoundError:
+                self.__on_error('[light_red]Unable to find file[/light_red], try again\n')
+            except Exception as e:
+                self.__on_error(
+                    'Looks like file [light_red]is corrupted[/light_red], try again, if you can\'t fix this error by '
+                    f'yourself tell [light_yellow]repinek about this,[/light_yellow] {e}, {e.__traceback__.tb_lineno}\n'
+                      )
+
+
+id_number = -1  # id number for object
 
 # object example
 data = {
-    "Name": "Placeable_Floor_Soft_Vanilla(Clone)",
-    "ID": -10005,
-    "VariantGuid": "9422ba3d-b426-486f-864f-385cb21d1212",
-    "GUIDs": "0e2247bc-1388-4226-917d-d9a26e6813b0",
-    "Position": [
+    'Name': 'Placeable_Floor_Soft_Vanilla(Clone)',
+    'ID': -10005,
+    'VariantGuid': '9422ba3d-b426-486f-864f-385cb21d1212',
+    'GUIDs': '0e2247bc-1388-4226-917d-d9a26e6813b0',
+    'Position': [
         -3.81721544,
         65.0,
         -152.007324
     ],
-    "CurrentRotation": [
+    'CurrentRotation': [
         0.0,
         0.0,
         0.0
     ],
-    "Local Scale": [
+    'Local Scale': [
         1.0,
         1.0,
         1.0
     ],
-    "Group Type": "None",
-    "ColourSwapIndex": -1,
-    "Shader Scale": [
+    'Group Type': 'None',
+    'ColourSwapIndex': -1,
+    'Shader Scale': [
         1.0,
         1.0,
         1.0
     ],
-    "Floor Pivot Pos": 0.0,
-    "Floor Depth": 0.0,
-    "Floor Increment Amount": 1.0
+    'Floor Pivot Pos': 0.0,
+    'Floor Depth': 0.0,
+    'Floor Increment Amount': 1.0
 }
-# fix for digital
-if theme == "digital":
-    data["Name"] = "Placeable_Floor_Soft_Retro(Clone)"
-kek = {"Version": "V1",
-                    "Test Mode Completed": True,
-                    "Level Theme ID": "THEME_VANILLA",
-                    "Level Published": False,
-                    "Level Music": "MUS_InGame_Fall_N_Roll",
-                    "What does the bean say": "gbgGpO5UXftvdC+TK/5zR6pknqciPVunpoMnuNzkBRyjKjqy81CYwVwdQ/HJ+RU2g5B2UaQZq6MEiA2BvXh7wg==",
-                    "SkyboxId": "Vanilla_Skybox",
-                    "Game Mode ID": "GAMEMODE_GAUNTLET",
-                    "Max Capacity": 40,
-                    "No of Winners": -1,
-                    "No of Eliminations": -1.0,
-                    "Slime Height": -1.0,
-                    "Slime Speed": -1.0,
-                    "Camera": {"Position": [135.094772, 90.8210449, -216.08284],
-                    "Pitch and Yaw": [14.6352329, -83.75641],
-                    "Distance": 100.0},
-                    "Button Thumbnail": "",
-                    "Floors": {}}
-if theme == 'digital':
-    kek["Level Theme ID"] = 'THEME_RETRO'
-    kek["SkyboxId"] = 'Retro_Skybox'
 
-# its shitcode, but i dont care (im so lazy to found other solution)
-with open(FGC_json, 'w') as f:
-    f.write(json.dumps(kek))
-with open(FGC_json, 'rb+') as fh:
-    fh.seek(-3, 2)
-    fh.truncate()
-with open(FGC_json, 'a') as f:
-    f.write("[")
+kek = {'Version': 'V1',
+       'Test Mode Completed': True,
+       'Level Theme ID': 'THEME_VANILLA',
+       'Level Published': False,
+       'LevelCreationTimestamp': 1703262048686,
+       'Level Music': 'MUS_InGame_Fall_N_Roll',
+       'What does the bean say': 'gbgGpO5UXftvdC+TK/5zR6pknqciPVunpoMnuNzkBRyjKjqy81CYwVwdQ/HJ+RU2g5B2UaQZq6MEiA2BvXh7wg==',
+       'SkyboxId': 'Vanilla_Skybox',
+       'Game Mode ID': 'GAMEMODE_GAUNTLET',
+       'Max Capacity': 40,
+       'No of Winners': -1,
+       'No of Eliminations': -1.0,
+       'Slime Height': -1.0,
+       'Slime Speed': -1.0,
+       'Camera': {'Position': [135.094772, 90.8210449, -216.08284],
+       'Pitch and Yaw': [14.6352329, -83.75641],
+       'Distance': 100.0},
+       'Button Thumbnail': '',
+       'Floors': [{}]}
 
-# for global
-variant_guid = "kek"
-guids_sss = "obed"
+# dont forget to put this into "kek"
+#f.write('"FirstBuildSessionId": "38f4bbc0-3978-4194-b3e7-463f1a25e2ee",')
+#f.write(' "LevelCreationTimestamp": 1703262048686,')
+#f.write(' "LevelSavedAtTimestamp": 1703262185389,')
+#f.write(' "LevelLastModifiedAtTimestamp": 1703262181223,')
+#f.write(' "LevelPublishedAtTimestamp": 1703262185389,')
+#f.write(' "LevelNameIsCustom": true,')
+#f.write(' "LevelDescriptionIsCustom": false,')
+#f.write(' "Min Capacity": 1}')
 
-#func for add pixels to json (experimental)
-def addpixeltojson():
-    global id_number
-    global data
-    global FGC_json
-    global variant_guid
-    global guids_sss
-    id_number = id_number - 1
-    data["ID"] = id_number
-    data["Position"][0] = x * 4.075
-    data["Position"][2] = y * 4.075
-    data["ColourSwapIndex"] = closest_value
-    random_key = uuid.uuid4()
-    formatted_key = str(random_key).replace('-', '')
-    variant_guid = f"{formatted_key[:8]}-{formatted_key[8:12]}-{formatted_key[12:16]}-{formatted_key[16:20]}-{formatted_key[20:]}"
-    random_key2 = uuid.uuid4()
-    formatted_key2 = str(random_key2).replace('-', '')
-    guids_sss = f"{formatted_key2[:8]}-{formatted_key2[8:12]}-{formatted_key2[12:16]}-{formatted_key2[16:20]}-{formatted_key2[20:]}"
-    data["GUIDs"] = guids_sss
-    data["VariantGuid"] = variant_guid
-    with open(FGC_json, "a") as f:
-        f.write(json.dumps(data, ensure_ascii=False))
-        f.write(",")
-# every pixel
-for x in range(width):
-    for y in range(height):
-        pixel = image.getpixel((x, y)) # get pixel rgb
-        r, g, b = pixel[:3] # fix alpha
-        try:
-            a = pixel[3]
-        except IndexError:
-             a = 1 # im stupid why 0 LOL
-        #parsed random closest color from internet xd
-        def closest_colour(requested_colour):
-            min_colours = {}
-            for key, name in webcolors.CSS2_HEX_TO_NAMES.items():
-                r_c, g_c, b_c = webcolors.hex_to_rgb(key)
-                rd = (r_c - requested_colour[0]) ** 2
-                gd = (g_c - requested_colour[1]) ** 2
-                bd = (b_c - requested_colour[2]) ** 2
-                min_colours[(rd + gd + bd)] = name
-            return min_colours[min(min_colours.keys())]
-        def get_colour_name(requested_colour):
-            try:
-                closest_name = actual_name = webcolors.rgb_to_name(requested_colour, spec=u'css2')
-            except ValueError:
-                closest_name = closest_colour(requested_colour)
-                actual_name = None
-            return actual_name, closest_name
+def rgb_to_hex(rgb: tuple[int, int, int] | tuple[int, ...]):
+    return '%02x%02x%02x' % rgb
 
-        requested_colour = (r, g, b)
-        actual_name, closest_name = get_colour_name(requested_colour)
-        if theme == "digital":
-            closest_value = colors_digital[closest_name]
-        else:
-            closest_value = colors_original[closest_name]
-        if white_yes_or_no == "yes" and closest_name == "white":
-            print("skip")
-            continue
-        elif black_yes_or_no == "yes" and closest_name == "black":
-            print("skip")
-            continue
-        else:
-            try:
-                if a > 0: #alpha above 0
-                    addpixeltojson()
-                # elif a == "no alpha":
-                    # addpixeltojson()
-                #dont needed anymore
-                else:
-                    print("Alpha is 0, unable to set pixel")
-                    continue
-            except Exception as e:
-                print(f"Report about this to repinek. {e.__traceback__.tb_lineno}, {e}")
-            posx = x * 4.075
-            posy = y * 4.075
-            print(f"RGB: {pixel}, alpha: {a}, color name: {closest_name}, color index: {closest_value}, object ID: {id_number}, POS X: {posx}, POS Y: {posy}, VatirantGuid: {variant_guid}, GUIDs: {guids_sss}")
-            # my old bad code below, fixed by a = 0, 359 line
-            '''
-            except TypeError:
-                id_number = id_number - 1
-                data["ID"] = id_number
-                data["Position"][0] = x * 4.075
-                data["Position"][2] = y * 4.075
-                data["ColourSwapIndex"] = closest_value
-                random_key = uuid.uuid4()
-                formatted_key = str(random_key).replace('-', '')
-                variant_guid = f"{formatted_key[:8]}-{formatted_key[8:12]}-{formatted_key[12:16]}-{formatted_key[16:20]}-{formatted_key[20:]}"
-                random_key2 = uuid.uuid4()
-                formatted_key2 = str(random_key2).replace('-', '')
-                guids_sss = f"{formatted_key2[:8]}-{formatted_key2[8:12]}-{formatted_key2[12:16]}-{formatted_key2[16:20]}-{formatted_key2[20:]}"
-                data["GUIDs"] = guids_sss
-                data["VariantGuid"] = variant_guid
 
-                with open(FGC_json, "a") as f:
-                    f.write(json.dumps(data, ensure_ascii=False))
-                    f.write(",")
-                '''
+def closest_colour(requested_colour: tuple[int, int, int]):
+    min_colours = {}
+    for key, name in webcolors.CSS2_HEX_TO_NAMES.items():
+        r_c, g_c, b_c = webcolors.hex_to_rgb(key)
+        rd = (r_c - requested_colour[0]) ** 2
+        gd = (g_c - requested_colour[1]) ** 2
+        bd = (b_c - requested_colour[2]) ** 2
+        min_colours[(rd + gd + bd)] = name
+    return min_colours[min(min_colours.keys())]
 
-# its shitcode x2, but i dont care (im so lazy to found other solution)
-with open(FGC_json, 'rb+') as fh:
-    fh.seek(-1, 2)
-    fh.truncate()
-with open(FGC_json, 'a') as f:
-    f.write("],")
-with open(FGC_json, 'a') as f:
-    f.write('"FirstBuildSessionId": "38f4bbc0-3978-4194-b3e7-463f1a25e2ee",')
-    f.write(' "LevelCreationTimestamp": 1703262048686,')
-    f.write(' "LevelSavedAtTimestamp": 1703262185389,')
-    f.write(' "LevelLastModifiedAtTimestamp": 1703262181223,')
-    f.write(' "LevelPublishedAtTimestamp": 1703262185389,')
-    f.write(' "LevelNameIsCustom": true,')
-    f.write(' "LevelDescriptionIsCustom": false,')
-    f.write(' "Min Capacity": 1}')
-
-print("Generation completed! Press \"Replace existing maps with level\" in FallGuysTools to load your level\n") #yea, use FGTools guys
-os.remove(file_path_output)
-time.sleep(3)
