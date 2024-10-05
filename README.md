@@ -61,6 +61,7 @@ isDigital = False/True
 4. Now, you need to load this json file in to the game, good luck! (if you dont know how to do it, use FallGuysTools)
 
 ## Credits
+- [@Loamfy](https://github.com/Loamfy) added support for hex colors
 - [@repinek](https://github.com/repinek) creator of this program
 - [@FloyzI](https://github.com/floyzi) for creating mod and betatest
 

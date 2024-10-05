@@ -1,3 +1,3 @@
-Pillow
 webcolors
-colorama
+pillow
+rich
