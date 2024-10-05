@@ -30,6 +30,7 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: Build executables or extension modules from Python projects
+        run: cd src
         uses: Nuitka/Nuitka-Action@v1.1
         with:
           nuitka-version: main
@@ -42,7 +43,7 @@ jobs:
           assume-yes-for-downloads: true
           warn-implicit-exceptions: true
           enable-plugin: pylint-warnings
-          include-package: src/img2FGC
+          include-package: img2FGC
           output-dir: dist
           product-name: Image To FGC
           file-description: Image To FGC
@@ -55,7 +56,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ${{ runner.os }} Python Build
-          path: dist/*.whl
+          path: src/dist/*.exe
 
       - if: github.event.review.state == 'approved'
         name: Upload files to a GitHub release
