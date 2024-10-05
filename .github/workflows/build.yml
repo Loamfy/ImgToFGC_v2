@@ -27,10 +27,11 @@ jobs:
           cache: 'pip'
 
       - name: Install requirements.txt
-        run: pip install -r requirements.txt
+        run: |
+          pip install -r requirements.txt
+          cd src
 
       - name: Build executables or extension modules from Python projects
-        run: cd src
         uses: Nuitka/Nuitka-Action@v1.1
         with:
           nuitka-version: main
@@ -49,14 +50,14 @@ jobs:
           file-description: Image To FGC
           file-version: 1.0.0.52
           product-version: 1.0.0.52
-          windows-icon-from-ico: src/img2FGC/icon.png
+          windows-icon-from-ico: img2FGC/icon.png
       # - run: wheel unpack wheels/JPB*.whl # 7z a -mx1 -ms64m -sfx test.7z .\*
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
           name: ${{ runner.os }} Python Build
-          path: src/dist/*.exe
+          path: dist/*.exe
 
       - if: github.event.review.state == 'approved'
         name: Upload files to a GitHub release
