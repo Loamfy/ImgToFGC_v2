@@ -76,7 +76,7 @@ class Img2FGC:
                   f'Width: {self.args.width}\n'
                   f'Height: {self.args.height}\n'
                   f'Delete white: {self.args.shouldDeleteWhitePixels}, black: {self.args.shouldDeleteBlackPixels}\n'
-                  f'Theme: {self.args.isDigital}')
+                  f'Digital: {self.args.isDigital}')
             self.path_to_file = self.args.path_to_file
             self.width = self.args.width
             self.height = self.args.height
