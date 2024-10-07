@@ -27,14 +27,11 @@ jobs:
           cache: 'pip'
 
       - name: Install requirements.txt
-        run: |
-          pip install -r requirements.txt
-          cd src
+        run: pip install -r requirements.txt
 
-      - name: Build executables or extension modules from Python projects
+      - name: Build img2FGC
         uses: Nuitka/Nuitka-Action@v1.1
         with:
-          nuitka-version: main
           script-name: img2FGC
           onefile: true
           standalone: true
@@ -50,7 +47,7 @@ jobs:
           file-description: Image To FGC
           file-version: 1.0.0.52
           product-version: 1.0.0.52
-          windows-icon-from-ico: img2FGC/icon.png
+          windows-icon-from-ico: img2FGC/icon.ico
       # - run: wheel unpack wheels/JPB*.whl # 7z a -mx1 -ms64m -sfx test.7z .\*
 
       - name: Upload Artifacts

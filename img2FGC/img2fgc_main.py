@@ -1,12 +1,13 @@
-import argparse
-import json
-import os
-import platform
-import time
-import uuid
-import webcolors
-from PIL import Image
 from rich import print
+from PIL import Image
+import webcolors
+import platform
+import argparse
+import random
+import json
+import uuid
+import time
+import os
 
 if platform.system() == 'Windows':
     pass
@@ -15,6 +16,8 @@ else:
     os.system('pause')
     exit(1)
 
+Name_original = 'Placeable_Floor_Soft_Vanilla(Clone)'
+Name_digital = 'Placeable_Floor_Soft_Retro(Clone)'
 type_of_kek = dict
 type_of_data = dict
 argparser = argparse.ArgumentParser(prog='img2FGC',
@@ -54,6 +57,9 @@ FGC_json = os.path.join(appdata_fg, 'Img2FGC.json')
 class Img2FGC:
     def __init__(self):
         self.pixels: list[dict[str, str | int | list[float]]] = []
+        self.random = lambda: random.randint(-1000000, -1)
+        self.time = int(time.time() * 1000)  # fg time format is in milliseconds
+        self.uuid4 = lambda: str(uuid.uuid4()).replace('-', '')
         self._init()
 
     @staticmethod
@@ -65,12 +71,12 @@ class Img2FGC:
     def _init(self):
         self.args = argparser.parse_args()
         try:
-            print('[light_green]Config[/light_green:\n'
-                  f'path: {self.args.path_to_file}\n'
-                  f'width: {self.args.width}\n'
-                  f'height: {self.args.height}\n'
-                  f'delete white: {self.args.shouldDeleteWhitePixels}, black: {self.args.shouldDeleteBlackPixels}\n'
-                  f'theme: {self.args.isDigital}')
+            print('[light_green]Config[/light_green]:\n'
+                  f'Path: {self.args.path_to_file}\n'
+                  f'Width: {self.args.width}\n'
+                  f'Height: {self.args.height}\n'
+                  f'Delete white: {self.args.shouldDeleteWhitePixels}, black: {self.args.shouldDeleteBlackPixels}\n'
+                  f'Theme: {self.args.isDigital}')
             self.path_to_file = self.args.path_to_file
             self.width = self.args.width
             self.height = self.args.height
@@ -78,6 +84,11 @@ class Img2FGC:
             self.shouldDeleteBlackPixels = self.args.shouldDeleteBlackPixels
             self.isDigital = self.args.isDigital
             self.template = kek
+            self.name = Name_original
+            self.ColourPaletteID = 'Vanilla'
+            if self.isDigital:
+                self.name = Name_digital
+                self.ColourPaletteID = 'Retro'
         except Exception as e:
             self.__on_error(f'Send this to Loamfy: {e.__traceback__.tb_lineno}, {e}\n')
 
@@ -85,10 +96,15 @@ class Img2FGC:
         if self.isDigital:
             kek['Level Theme ID'] = 'THEME_RETRO'
             kek['SkyboxId'] = 'Retro_Skybox'
+            kek['LevelCreationTimestamp'] = self.time - random.randint(1, 5_400_000)
+            kek['LevelSavedAtTimestamp'] = self.time
+            kek['LevelLastModifiedAtTimestamp'] = self.time - random.randint(1, 1000)
+            kek['LevelPublishedAtTimestamp'] = self.time - random.randint(1, 30_000)
         return kek
 
     def finish(self):
-        self.template['Floors'] = self.pixels
+        self.template['Floors'] = list(self.pixels)
+        print(self.pixels)
         self.finished_json = self.template
         with open(FGC_json, 'a') as f:
             json.dump(self.finished_json, f, ensure_ascii=False, indent=4)
@@ -116,25 +132,29 @@ class Img2FGC:
             self.__on_error(f'Report about this to Loamfy: {e.__traceback__.tb_lineno}, {e}\n')
 
     def _put_pixel(self, hex_value: str, x_y: tuple[int, int]) -> dict[str, str | int | list[float]]:
-        global id_number
-        id_number = id_number - 1
-        data['ID'] = id_number
-        data['Position'][0] = x_y[0] * 4.075
-        data['Position'][2] = x_y[1] * 4.075
-        data['ColourHexCode'] = hex_value
-        data['ColourPaletteID'] = 'Vanilla'
-        if self.isDigital:
-            data['Name'] = 'Placeable_Floor_Soft_Retro(Clone)'
-            data['ColourPaletteID'] = 'Retro'
-        random_key = uuid.uuid4()
-        random_key2 = uuid.uuid4()
-        formatted_key = str(random_key).replace('-', '')
-        formatted_key2 = str(random_key2).replace('-', '')
-        self.guids_sss = f'{formatted_key2[:8]}-{formatted_key2[8:12]}-{formatted_key2[12:16]}-{formatted_key2[16:20]}-{formatted_key2[20:]}'
-        self.variant_guid = f'{formatted_key[:8]}-{formatted_key[8:12]}-{formatted_key[12:16]}-{formatted_key[16:20]}-{formatted_key[20:]}'
-        data['GUIDs'] = self.guids_sss
-        data['VariantGuid'] = self.variant_guid
-        return data
+        _uuid4 = self.uuid4()
+        __uuid4 = self.uuid4()
+        return {"Name": self.name,
+                "Group Type": "None",
+                "VariantGuid": f'{_uuid4[:8]}-{_uuid4[8:12]}-{_uuid4[12:16]}-{_uuid4[16:20]}-{_uuid4[20:]}',
+                "GUIDs": f'{__uuid4[:8]}-{__uuid4[8:12]}-{__uuid4[12:16]}-{__uuid4[16:20]}-{__uuid4[20:]}',
+                'ColourHexCode': hex_value,
+                'ColourPaletteID': self.ColourPaletteID,
+                'ID': self.random(),
+                'Position': [x_y[0] * 4.075,
+                             65,
+                             x_y[1] * 4.075
+                             ],
+                'CurrentRotation': [0, 0, 0],
+                'Local Scale': [1, 1, 1],
+                'Shader Scale': [1, 1, 1],
+                "Floor Pivot Pos": 0,
+                "Floor Depth": 0,
+                "Floor Increment Amount": 1,
+                "Active": True,
+                "VisibilityParam": 1,
+                "CollisionEnabledParam": True
+                }
 
     def _configure_pixels(self, resized_image: Image.Image) -> None:
         # every pixel
@@ -148,8 +168,9 @@ class Img2FGC:
                 except IndexError:
                     a = 1
 
-                actual_name, closest_name = closest_colour((r, g, b))
+                closest_name = closest_colour((r, g, b))
                 closest_value = rgb_to_hex(pixel)
+                print(closest_value, pixel)
                 if self.shouldDeleteWhitePixels and closest_name == 'white':
                     print('skip')
                     continue
@@ -168,7 +189,7 @@ class Img2FGC:
                     posx = x * 4.075
                     posy = y * 4.075
                     print(
-                        f'RGB: {pixel}, alpha: {a}, color name: {closest_name}, color index: {closest_value}, object ID: {id_number}, POS X: {posx}, POS Y: {posy}, VatirantGuid: {self.variant_guid}, GUIDs: {self.guids_sss}')
+                        f'RGB: {pixel}, alpha: {a}, color name: {closest_name}, color index: {closest_value}, POS X: {posx}, POS Y: {posy}')
 
     def start(self):
         print(
@@ -179,7 +200,6 @@ class Img2FGC:
         self.finish()
         print('Generation completed! Press \'Replace existing maps with level\' in FallGuysTools to load your level\n')
         # yea, use FGTools guys
-        os.remove(file_path_output)
         time.sleep(3)
 
 
@@ -218,79 +238,79 @@ class Img2FGC:
                     f'yourself tell [light_yellow]repinek about this,[/light_yellow] {e}, {e.__traceback__.tb_lineno}\n'
                       )
 
-
-id_number = -1  # id number for object
-
 # object example
 data = {
-    'Name': 'Placeable_Floor_Soft_Vanilla(Clone)',
-    'ID': -10005,
-    'VariantGuid': '9422ba3d-b426-486f-864f-385cb21d1212',
-    'GUIDs': '0e2247bc-1388-4226-917d-d9a26e6813b0',
+    "Name": "Placeable_Floor_Soft_Vanilla(Clone)",
+    "Group Type": "None",
+    "VariantGuid": "9422ba3d-b426-486f-864f-385cb21d1212",
+    "GUIDs": "02607599-44b9-4b3e-9509-d9f550b8fe4a",
+    'ColourHexCode': '#111111',
+    'ColourPaletteID': 'Vanilla',
+    'ID': -657444,
     'Position': [
         -3.81721544,
-        65.0,
+        65,
         -152.007324
     ],
     'CurrentRotation': [
-        0.0,
-        0.0,
-        0.0
+        0,
+        0,
+        0
     ],
     'Local Scale': [
-        1.0,
-        1.0,
-        1.0
+        1,
+        1,
+        1
     ],
-    'Group Type': 'None',
-    'ColourSwapIndex': -1,
     'Shader Scale': [
-        1.0,
-        1.0,
-        1.0
+        1,
+        1,
+        1
     ],
-    'Floor Pivot Pos': 0.0,
-    'Floor Depth': 0.0,
-    'Floor Increment Amount': 1.0
+    "Floor Pivot Pos": 0,
+    "Floor Depth": 0,
+    "Floor Increment Amount": 1,
+    "Active": True,
+    "VisibilityParam": 1,
+    "CollisionEnabledParam": True
 }
 
 kek = {'Version': 'V1',
-       'Test Mode Completed': True,
        'Level Theme ID': 'THEME_VANILLA',
-       'Level Published': False,
-       'LevelCreationTimestamp': 1703262048686,
-       'LevelSavedAtTimestamp': 1703262185389,
-       "LevelLastModifiedAtTimestamp": 1703262181223,
-       "LevelPublishedAtTimestamp": 1703262185389,
-       "LevelNameIsCustom": True,
-       "LevelDescriptionIsCustom": False,
-       "Min Capacity": 1,
-       'Level Music': 'MUS_InGame_Fall_N_Roll',
-       'What does the bean say': 'gbgGpO5UXftvdC+TK/5zR6pknqciPVunpoMnuNzkBRyjKjqy81CYwVwdQ/HJ+RU2g5B2UaQZq6MEiA2BvXh7wg==',
-       'SkyboxId': 'Vanilla_Skybox',
+       'Level Music': 'MUS_InGame_Want_Revenge',
+       'What does the bean say': 'i/8S/F/FA7nUw0OOMFIkrMWWZkxARdC/uYn/3ivAa2CrYJdnYdPKz1UL1QRa0go7VcmtG8gZkfSVdMKyxPC+Yg==',
        'Game Mode ID': 'GAMEMODE_GAUNTLET',
+       'FirstBuildSessionId': '58cf60b5-2098-4ca5-8ade-90c6c15d5cf3',
+       'SkyboxId': 'Vanilla_Skybox',
+       'LevelCreationTimestamp': 0,
+       'LevelSavedAtTimestamp': 0,
+       'LevelLastModifiedAtTimestamp': 0,
+       'LevelPublishedAtTimestamp': 0,  # this values will be modified to current Unix date
        'Max Capacity': 40,
        'No of Winners': -1,
-       'No of Eliminations': -1.0,
-       'Slime Height': -1.0,
-       'Slime Speed': -1.0,
-       'Camera': {'Position': [135.094772, 90.8210449, -216.08284],
-       'Pitch and Yaw': [14.6352329, -83.75641],
-       'Distance': 100.0},
-       'Button Thumbnail': '',
-       'Floors': [{}]}
+       'Min Capacity': 1,
+       'No of Eliminations': -1,
+       'Slime Height': -1,
+       'Slime Speed': -1,
+       'Test Mode Completed': True,
+       'Level Published': False,
+       'LevelNameIsCustom': True,
+       'LevelDescriptionIsCustom': False,
+       'Camera': {'Position': [-9.66126, 65, -176.04482], 'Pitch and Yaw': [28.690294, 1.6673589], 'Distance': 100},
+       'Floors': [{}]
+       }
+
 
 def rgb_to_hex(rgb: tuple[int, int, int] | tuple[int, ...]):
-    return '%02x%02x%02x' % rgb
+    return '#{:02x}{:02x}{:02x}'.format(*rgb).upper()
 
 
 def closest_colour(requested_colour: tuple[int, int, int]):
     min_colours = {}
-    for key, name in webcolors.CSS2_HEX_TO_NAMES.items():
+    for key, name in webcolors._definitions._CSS3_HEX_TO_NAMES.items():
         r_c, g_c, b_c = webcolors.hex_to_rgb(key)
         rd = (r_c - requested_colour[0]) ** 2
         gd = (g_c - requested_colour[1]) ** 2
         bd = (b_c - requested_colour[2]) ** 2
         min_colours[(rd + gd + bd)] = name
     return min_colours[min(min_colours.keys())]
-
