@@ -1,9 +1,7 @@
-from click import prompt
 from rich import print
 from PIL import Image
 import webcolors
 import platform
-import argparse
 import random
 import click
 import json
