@@ -30,25 +30,8 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: Build img2FGC
-        uses: Nuitka/Nuitka-Action@v1.1
-        with:
-          script-name: img2FGC
-          onefile: true
-          standalone: true
-          clang: true
-          warn-unusual-code: true
-          show-anti-bloat-changes: true
-          assume-yes-for-downloads: true
-          warn-implicit-exceptions: true
-          enable-plugin: pylint-warnings
-          include-package: img2FGC
-          output-dir: dist
-          product-name: Image To FGC
-          file-description: Image To FGC
-          file-version: 1.0.0.52
-          product-version: 1.0.0.52
-          windows-icon-from-ico: img2FGC/icon.ico
-      # - run: wheel unpack wheels/JPB*.whl # 7z a -mx1 -ms64m -sfx test.7z .\*
+        run: nuitka --onefile --standalone --clang --warn-unusual-code --show-anti-bloat-changes --assume-yes-for-downloads --warn-implicit-exceptions --include-package=img2FGC --output-dir=dist --product-name="Image To FGC" --file-description="Image To FGC" --file-version=1.0.0.52 --product-version=1.0.0.52 --windows-icon-from-ico=img2FGC/icon.ico --enable-plugin=pylint-warnings .\img2FGC
+
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4

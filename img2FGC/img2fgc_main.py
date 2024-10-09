@@ -1,9 +1,11 @@
+from click import prompt
 from rich import print
 from PIL import Image
 import webcolors
 import platform
 import argparse
 import random
+import click
 import json
 import uuid
 import time
@@ -20,16 +22,6 @@ Name_original = 'Placeable_Floor_Soft_Vanilla(Clone)'
 Name_digital = 'Placeable_Floor_Soft_Retro(Clone)'
 type_of_kek = dict
 type_of_data = dict
-argparser = argparse.ArgumentParser(prog='img2FGC',
-                                    description='Convert image to Fall Guys Creative Level!',
-                                    exit_on_error=False)
-argparser.add_argument('--path-to-file',               required=True, type=str, default='example.png')
-argparser.add_argument('--width',                     required=True, type=int)
-argparser.add_argument('--height',                    required=True, type=int)
-argparser.add_argument('--isDigital',                required=False, type=bool, default=False)
-argparser.add_argument('--shouldDeleteBlackPixels',  required=False, type=bool, default=False)
-argparser.add_argument('--shouldDeleteWhitePixels',  required=False, type=bool, default=False)
-
 
 print('[light_cyan3]NOTE: Although I don’t believe that you can get[/light_cyan3] [red3]banned[/red3] [light_cyan3]for this, but[/light_cyan3] [light_green]be careful![/light_green] [red3]Don\'t use this script if you want to import NSFW or if you are stupid[/red3]\n\n'
 
@@ -55,12 +47,19 @@ FGC_json = os.path.join(appdata_fg, 'Img2FGC.json')
 
 
 class Img2FGC:
-    def __init__(self):
+    @click.command(name='img2FGC')
+    @click.option('--path-to-file',            default='example.png', prompt='Image',               help='Image, that will be on the map',       required=True, type=click.STRING)
+    @click.option('--width',                   default=70,            prompt='Width',               help='Width of an image to be on the map',    required=True, type=click.INT)
+    @click.option('--height',                  default=70,            prompt='Height',              help='Height of an image to be on the map',   required=True, type=click.INT)
+    @click.option('--isDigital',               default=False,         prompt='Image',               help='Image, that will be on the map',        required=True, type=click.BOOL)
+    @click.option('--shouldDeleteBlackPixels', default=False,         prompt='Delete Black Pixels', help='Should app delete Black Pixels or no?', required=True, type=click.BOOL)
+    @click.option('--shouldDeleteWhitePixels', default=False,         prompt='Delete White Pixels', help='Should app delete White Pixels or no?', required=True, type=click.BOOL)
+    def __init__(self, path_to_file, width, height, isDigital, shouldDeleteBlackPixels, shouldDeleteWhitePixels):
         self.pixels: list[dict[str, str | int | list[float]]] = []
         self.random = lambda: random.randint(-1000000, -1)
         self.time = int(time.time() * 1000)  # fg time format is in milliseconds
         self.uuid4 = lambda: str(uuid.uuid4()).replace('-', '')
-        self._init()
+        self._init(path_to_file, width, height, isDigital, shouldDeleteBlackPixels, shouldDeleteWhitePixels)
 
     @staticmethod
     def __on_error(message: str) -> None:
@@ -68,27 +67,28 @@ class Img2FGC:
         os.system('pause')
         exit(1)
 
-    def _init(self):
-        self.args = argparser.parse_args()
+    def _init(self, path_to_file: str, width: int, height: int, isDigital: bool, shouldDeleteBlackPixels: bool,
+              shouldDeleteWhitePixels: bool):
         try:
-            print('[light_green]Config[/light_green]:\n'
-                  f'Path: {self.args.path_to_file}\n'
-                  f'Width: {self.args.width}\n'
-                  f'Height: {self.args.height}\n'
-                  f'Delete white: {self.args.shouldDeleteWhitePixels}, black: {self.args.shouldDeleteBlackPixels}\n'
-                  f'Digital: {self.args.isDigital}')
-            self.path_to_file = self.args.path_to_file
-            self.width = self.args.width
-            self.height = self.args.height
-            self.shouldDeleteWhitePixels = self.args.shouldDeleteWhitePixels
-            self.shouldDeleteBlackPixels = self.args.shouldDeleteBlackPixels
-            self.isDigital = self.args.isDigital
+            self.path_to_file = path_to_file
+            self.width = width
+            self.height = height
+            self.isDigital = isDigital
+            self.shouldDeleteBlackPixels = shouldDeleteBlackPixels
+            self.shouldDeleteWhitePixels = shouldDeleteWhitePixels
             self.template = kek
             self.name = Name_original
             self.ColourPaletteID = 'Vanilla'
             if self.isDigital:
                 self.name = Name_digital
                 self.ColourPaletteID = 'Retro'
+            print('[light_green]Config[/light_green]:\n'
+                  f'Path: {self.path_to_file}\n'
+                  f'Width: {self.width}\n'
+                  f'Height: {self.height}\n'
+                  f'Delete white: {self.shouldDeleteWhitePixels}, black: {self.shouldDeleteBlackPixels}\n'
+                  f'Digital: {self.isDigital}')
+
         except Exception as e:
             self.__on_error(f'Send this to Loamfy: {e.__traceback__.tb_lineno}, {e}\n')
 
