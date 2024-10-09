@@ -7,6 +7,7 @@ import click
 import json
 import uuid
 import time
+import sys
 import os
 
 if platform.system() == 'Windows':
@@ -14,8 +15,9 @@ if platform.system() == 'Windows':
 else:
     print('Windows is the only supported OS for this mod')
     os.system('pause')
-    exit(1)
+    sys.exit(1)
 
+example = os.path.join(os.getcwd(), '..', 'Images', 'example.png')
 Name_original = 'Placeable_Floor_Soft_Vanilla(Clone)'
 Name_digital = 'Placeable_Floor_Soft_Retro(Clone)'
 type_of_kek = dict
@@ -44,7 +46,7 @@ file_path_output = os.path.join(appdata_fg, 'output.txt')
 FGC_json = os.path.join(appdata_fg, 'Img2FGC.json')
 
 @click.command(name='img2FGC')
-@click.option('--path-to-file',            default='example.png', prompt='Image',               help='Image, that will be on the map',       required=True, type=click.STRING)
+@click.option('--path-to-file',            default=example,       prompt='Image',               help='Image, that will be on the map',       required=True, type=click.STRING)
 @click.option('--width',                   default=70,            prompt='Width',               help='Width of an image to be on the map',    required=True, type=click.INT)
 @click.option('--height',                  default=70,            prompt='Height',              help='Height of an image to be on the map',   required=True, type=click.INT)
 @click.option('--isDigital',               default=False,         prompt='Digital?',            help='Image, that will be on the map',        required=True, type=click.BOOL)
@@ -67,7 +69,7 @@ class Img2FGC:
     def __on_error(message: str) -> None:
         print(message)
         os.system('pause')
-        exit(1)
+        sys.exit(1)
 
     def _init(self, path_to_file: str, width: int, height: int, isDigital: bool, shouldDeleteBlackPixels: bool,
               shouldDeleteWhitePixels: bool):
