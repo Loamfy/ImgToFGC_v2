@@ -1,3 +1,3 @@
-from img2FGC.img2fgc_main import Img2FGC
+from img2FGC.img2fgc_main import start_img2fgc
 
-Img2FGC().start()
+start_img2fgc()

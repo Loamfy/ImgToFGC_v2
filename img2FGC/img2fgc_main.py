@@ -45,21 +45,25 @@ else:
 file_path_output = os.path.join(appdata_fg, 'output.txt')
 FGC_json = os.path.join(appdata_fg, 'Img2FGC.json')
 
+@click.command(name='img2FGC')
+@click.option('--path-to-file',            default='example.png', prompt='Image',               help='Image, that will be on the map',       required=True, type=click.STRING)
+@click.option('--width',                   default=70,            prompt='Width',               help='Width of an image to be on the map',    required=True, type=click.INT)
+@click.option('--height',                  default=70,            prompt='Height',              help='Height of an image to be on the map',   required=True, type=click.INT)
+@click.option('--isDigital',               default=False,         prompt='Digital?',            help='Image, that will be on the map',        required=True, type=click.BOOL)
+@click.option('--shouldDeleteBlackPixels', default=False,         prompt='Delete Black Pixels', help='Should app delete Black Pixels or no?', required=True, type=click.BOOL)
+@click.option('--shouldDeleteWhitePixels', default=False,         prompt='Delete White Pixels', help='Should app delete White Pixels or no?', required=True, type=click.BOOL)
+def start_img2fgc(**kwargs):
+    Img2FGC(*list(kwargs.values())).start()
+
+
 
 class Img2FGC:
-    @click.command(name='img2FGC')
-    @click.option('--path-to-file',            default='example.png', prompt='Image',               help='Image, that will be on the map',       required=True, type=click.STRING)
-    @click.option('--width',                   default=70,            prompt='Width',               help='Width of an image to be on the map',    required=True, type=click.INT)
-    @click.option('--height',                  default=70,            prompt='Height',              help='Height of an image to be on the map',   required=True, type=click.INT)
-    @click.option('--isDigital',               default=False,         prompt='Image',               help='Image, that will be on the map',        required=True, type=click.BOOL)
-    @click.option('--shouldDeleteBlackPixels', default=False,         prompt='Delete Black Pixels', help='Should app delete Black Pixels or no?', required=True, type=click.BOOL)
-    @click.option('--shouldDeleteWhitePixels', default=False,         prompt='Delete White Pixels', help='Should app delete White Pixels or no?', required=True, type=click.BOOL)
-    def __init__(self, path_to_file, width, height, isDigital, shouldDeleteBlackPixels, shouldDeleteWhitePixels):
+    def __init__(self, path_to_file, width, height, isdigital, shoulddeleteblackpixels, shoulddeletewhitepixels):
         self.pixels: list[dict[str, str | int | list[float]]] = []
         self.random = lambda: random.randint(-1000000, -1)
         self.time = int(time.time() * 1000)  # fg time format is in milliseconds
         self.uuid4 = lambda: str(uuid.uuid4()).replace('-', '')
-        self._init(path_to_file, width, height, isDigital, shouldDeleteBlackPixels, shouldDeleteWhitePixels)
+        self._init(path_to_file, width, height, isdigital, shoulddeleteblackpixels, shoulddeletewhitepixels)
 
     @staticmethod
     def __on_error(message: str) -> None:
@@ -198,7 +202,7 @@ class Img2FGC:
         time.sleep(5)
         self._configure_pixels(self._resize_image())
         self.finish()
-        print('Generation completed! Press \'Replace existing maps with level\' in FallGuysTools to load your level\n')
+        print('\nGeneration completed! Press \'Replace existing maps with level\' in FallGuysTools to load your level')
         # yea, use FGTools guys
         time.sleep(3)
 
