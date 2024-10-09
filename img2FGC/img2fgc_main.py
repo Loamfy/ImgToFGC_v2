@@ -108,7 +108,6 @@ class Img2FGC:
 
     def finish(self):
         self.template['Floors'] = list(self.pixels)
-        print(self.pixels)
         self.finished_json = self.template
         with open(FGC_json, 'a') as f:
             json.dump(self.finished_json, f, ensure_ascii=False, indent=4)
@@ -174,7 +173,6 @@ class Img2FGC:
 
                 closest_name = closest_colour((r, g, b))
                 closest_value = rgb_to_hex(pixel)
-                print(closest_value, pixel)
                 if self.shouldDeleteWhitePixels and closest_name == 'white':
                     print('skip')
                     continue
