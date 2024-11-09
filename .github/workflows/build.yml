@@ -19,10 +19,11 @@ jobs:
     steps:
       - name: Check-out repository
         uses: actions/checkout@v4
+
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.12.7'
+          python-version: '3.12'
           architecture: 'x64'
           cache: 'pip'
 
@@ -32,16 +33,8 @@ jobs:
       - name: Build img2FGC
         run: nuitka --onefile --standalone --clang --file-version=1.0.0.52 --product-version=1.0.0.52 --warn-unusual-code --show-anti-bloat-changes --assume-yes-for-downloads --warn-implicit-exceptions --include-package=img2FGC --output-dir=dist --product-name="Image To FGC" --file-description="Image To FGC" --windows-icon-from-ico=img2FGC/icon.ico --enable-plugin=pylint-warnings .\img2FGC
 
-
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
           name: ${{ runner.os }} Python Build
           path: dist/*.exe
-
-      - if: github.event.review.state == 'approved'
-        name: Upload files to a GitHub release
-        uses: svenstaro/upload-release-action@2.9.0
-        with:
-          file: dist/*.exe
-          tag: 1.0.0.52

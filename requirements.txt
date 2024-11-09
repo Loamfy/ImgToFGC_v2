@@ -1,0 +1,5 @@
+webcolors
+nuitka
+pillow
+click
+rich
