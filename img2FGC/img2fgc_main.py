@@ -2,6 +2,7 @@ from rich import print
 from PIL import Image
 import webcolors
 import platform
+# asyncio will be supported in future versions
 import random
 import click
 import json
@@ -60,7 +61,7 @@ def start_img2fgc(**kwargs):
 class Img2FGC:
     def __init__(self, path_to_file, width, height, isdigital, shoulddeleteblackpixels, shoulddeletewhitepixels):
         self.pixels: list[dict[str, str | int | list[float]]] = []
-        self.random = lambda: random.randint(-1000000, -1)
+        self.random = lambda: random.randint(-2000000, -1)
         self.time = int(time.time() * 1000)  # fg time format is in milliseconds
         self.uuid4 = lambda: str(uuid.uuid4()).replace('-', '')
         self._init(path_to_file, width, height, isdigital, shoulddeleteblackpixels, shoulddeletewhitepixels)
@@ -85,7 +86,6 @@ class Img2FGC:
             self.ColourPaletteID = 'Vanilla'
             if self.isDigital:
                 self.name = Name_digital
-                self.ColourPaletteID = 'Retro'
             print('[light_green]Config[/light_green]:\n'
                   f'Path: {self.path_to_file}\n'
                   f'Width: {self.width}\n'
@@ -100,22 +100,22 @@ class Img2FGC:
         if self.isDigital:
             kek['Level Theme ID'] = 'THEME_RETRO'
             kek['SkyboxId'] = 'Retro_Skybox'
-            kek['LevelCreationTimestamp'] = self.time - random.randint(1, 5_400_000)
-            kek['LevelSavedAtTimestamp'] = self.time
-            kek['LevelLastModifiedAtTimestamp'] = self.time - random.randint(1, 1000)
-            kek['LevelPublishedAtTimestamp'] = self.time - random.randint(1, 30_000)
+        kek['LevelCreationTimestamp'] = self.time - random.randint(1, 5_400_000)
+        kek['LevelSavedAtTimestamp'] = self.time
+        kek['LevelLastModifiedAtTimestamp'] = self.time - random.randint(1, 1000)
+        kek['LevelPublishedAtTimestamp'] = self.time - random.randint(1, 30_000)
         return kek
 
     def finish(self):
         self.template['Floors'] = list(self.pixels)
         self.finished_json = self.template
         with open(FGC_json, 'a') as f:
-            json.dump(self.finished_json, f, ensure_ascii=False, indent=4)
+            json.dump(self.finished_json, f, ensure_ascii=False)
 
-    def _resize_image(self) -> Image:
+    def _resize_image(self) -> Image.Image:
         try:
-            image_file = Image.open(self.path_to_file)
-            image = image_file.transpose(method=Image.Transpose.FLIP_LEFT_RIGHT)
+            image = Image.open(self.path_to_file)
+            image = image.transpose(method=Image.Transpose.FLIP_LEFT_RIGHT)
         except OSError:
             self.__on_error(f'Didn\'t found image with path {self.path_to_file}\n')
         except Exception as e:
@@ -137,12 +137,11 @@ class Img2FGC:
     def _put_pixel(self, hex_value: str, x_y: tuple[int, int]) -> dict[str, str | int | list[float]]:
         _uuid4 = self.uuid4()
         __uuid4 = self.uuid4()
-        return {"Name": self.name,
-                "Group Type": "None",
-                "VariantGuid": f'{_uuid4[:8]}-{_uuid4[8:12]}-{_uuid4[12:16]}-{_uuid4[16:20]}-{_uuid4[20:]}',
-                "GUIDs": f'{__uuid4[:8]}-{__uuid4[8:12]}-{__uuid4[12:16]}-{__uuid4[16:20]}-{__uuid4[20:]}',
+        return {'Name': self.name,
+                'Group Type': 'None',
+                'VariantGuid': f'{_uuid4[:8]}-{_uuid4[8:12]}-{_uuid4[12:16]}-{_uuid4[16:20]}-{_uuid4[20:]}',
+                'GUIDs': f'{__uuid4[:8]}-{__uuid4[8:12]}-{__uuid4[12:16]}-{__uuid4[16:20]}-{__uuid4[20:]}',
                 'ColourHexCode': hex_value,
-                'ColourPaletteID': self.ColourPaletteID,
                 'ID': self.random(),
                 'Position': [x_y[0] * 4.075,
                              65,
@@ -151,19 +150,20 @@ class Img2FGC:
                 'CurrentRotation': [0, 0, 0],
                 'Local Scale': [1, 1, 1],
                 'Shader Scale': [1, 1, 1],
-                "Floor Pivot Pos": 0,
-                "Floor Depth": 0,
-                "Floor Increment Amount": 1,
-                "Active": True,
-                "VisibilityParam": 1,
-                "CollisionEnabledParam": True
+                'Floor Pivot Pos': 0,
+                'Floor Depth': 0,
+                'Floor Increment Amount': 1,
+                'Active': True,
+                'VisibilityParam': 1,
+                'CollisionEnabledParam': True
                 }
 
-    def _configure_pixels(self, resized_image: Image.Image) -> None:
+    def _configure_pixels(self) -> None:
         # every pixel
+        image = self._resize_image()
         for x in range(self.width):
             for y in range(self.height):
-                pixel = resized_image.getpixel((x, y))  # get pixel rgb
+                pixel = image.getpixel((x, y))  # get pixel rgb
                 r, g, b = pixel[:3]  # fix alpha
 
                 try:
@@ -172,7 +172,7 @@ class Img2FGC:
                     a = 1
 
                 closest_name = closest_colour((r, g, b))
-                closest_value = rgb_to_hex(pixel)
+                closest_value = rgb_to_hex((r, g, b))
                 if self.shouldDeleteWhitePixels and closest_name == 'white':
                     print('skip')
                     continue
@@ -194,117 +194,77 @@ class Img2FGC:
                         f'RGB: {pixel}, alpha: {a}, color name: {closest_name}, color index: {closest_value}, POS X: {posx}, POS Y: {posy}')
 
     def start(self):
+        if os.path.exists(FGC_json):
+            os.remove(FGC_json)
         print(
             'After [light_green]5 seconds[/light_green] map should start generating, you will see some debug info (BETA)\n'
             'If you get some errors report about them to Loamfy, thanks')
         time.sleep(5)
-        self._configure_pixels(self._resize_image())
+        self._configure_pixels()
         self.finish()
         print('\nGeneration completed! Press \'Replace existing maps with level\' in FallGuysTools to load your level')
         # yea, use FGTools guys
         time.sleep(3)
 
 
-
-
-    def _init2(self) -> None:
-        # reading output.txt by mod
-        try:
-            with open(file_path_output, 'r', encoding='utf-8') as f1:
-                self.lines = f1.readlines()
-        except FileNotFoundError:
-            self.__on_error('[light_red]Unable to find file [/light_red], try again\n')
-
-        for line in self.lines:
-            try:
-                line = line.strip()
-                key, value = line.split(' = ')
-                match key:  # use switch-case to have faster experience (from python 3.10)
-                    case 'path_to_file':
-                        self.image_input = value
-                    case 'width':
-                        self.width_input = value
-                    case 'height':
-                        self.height_input = value
-                    case 'shouldDeleteBlackPixels':
-                        self.shouldDeleteBlackPixels = value.lower()
-                    case 'shouldDeleteWhitePixels':
-                        self.shouldDeleteWhitePixels = value.lower()
-                    case 'isDigital':
-                        self.isDigital = value.lower()
-            except FileNotFoundError:
-                self.__on_error('[light_red]Unable to find file[/light_red], try again\n')
-            except Exception as e:
-                self.__on_error(
-                    'Looks like file [light_red]is corrupted[/light_red], try again, if you can\'t fix this error by '
-                    f'yourself tell [light_yellow]repinek about this,[/light_yellow] {e}, {e.__traceback__.tb_lineno}\n'
-                      )
-
 # object example
 data = {
-    "Name": "Placeable_Floor_Soft_Vanilla(Clone)",
-    "Group Type": "None",
-    "VariantGuid": "9422ba3d-b426-486f-864f-385cb21d1212",
-    "GUIDs": "02607599-44b9-4b3e-9509-d9f550b8fe4a",
+    'Name': 'Placeable_Floor_Soft_Vanilla(Clone)',
+    'Group Type': 'None',
+    'VariantGuid': '9422ba3d-b426-486f-864f-385cb21d1212',
+    'GUIDs': '02607599-44b9-4b3e-9509-d9f550b8fe4a',
     'ColourHexCode': '#111111',
-    'ColourPaletteID': 'Vanilla',
     'ID': -657444,
     'Position': [
         -3.81721544,
         65,
         -152.007324
     ],
-    'CurrentRotation': [
-        0,
-        0,
-        0
-    ],
-    'Local Scale': [
-        1,
-        1,
-        1
-    ],
-    'Shader Scale': [
-        1,
-        1,
-        1
-    ],
-    "Floor Pivot Pos": 0,
-    "Floor Depth": 0,
-    "Floor Increment Amount": 1,
-    "Active": True,
-    "VisibilityParam": 1,
-    "CollisionEnabledParam": True
+    'CurrentRotation': [0, 0, 0],
+    'Local Scale': [1, 1, 1],
+    'Shader Scale': [1, 1, 1],
+    'Floor Pivot Pos': 0,
+    'Floor Depth': 0,
+    'Floor Increment Amount': 1,
+    'Active': True,
+    'VisibilityParam': 1,
+    'CollisionEnabledParam': True
 }
 
 kek = {'Version': 'V1',
        'Level Theme ID': 'THEME_VANILLA',
        'Level Music': 'MUS_InGame_Want_Revenge',
-       'What does the bean say': 'i/8S/F/FA7nUw0OOMFIkrMWWZkxARdC/uYn/3ivAa2CrYJdnYdPKz1UL1QRa0go7VcmtG8gZkfSVdMKyxPC+Yg==',
        'Game Mode ID': 'GAMEMODE_GAUNTLET',
        'FirstBuildSessionId': '58cf60b5-2098-4ca5-8ade-90c6c15d5cf3',
        'SkyboxId': 'Vanilla_Skybox',
-       'LevelCreationTimestamp': 0,
-       'LevelSavedAtTimestamp': 0,
-       'LevelLastModifiedAtTimestamp': 0,
-       'LevelPublishedAtTimestamp': 0,  # this values will be modified to current Unix date
        'Max Capacity': 40,
        'No of Winners': -1,
        'Min Capacity': 1,
        'No of Eliminations': -1,
        'Slime Height': -1,
        'Slime Speed': -1,
-       'Test Mode Completed': True,
+       'LevelCreationTimestamp': 0,  # this value will be modified to current Unix date
+       'LevelSavedAtTimestamp': 0,  # this value will be modified to current Unix date
+       'LevelLastModifiedAtTimestamp': 0,  # this value will be modified to current Unix date
+       'LevelPublishedAtTimestamp': 0,  # this value will be modified to current Unix date
+       'Test Mode Completed': False,
        'Level Published': False,
-       'LevelNameIsCustom': True,
+       'LevelNameIsCustom': False,
        'LevelDescriptionIsCustom': False,
-       'Camera': {'Position': [-9.66126, 65, -176.04482], 'Pitch and Yaw': [28.690294, 1.6673589], 'Distance': 100},
+       'Camera': {'Position': [140, 225, 160], 'Pitch and Yaw': [90, 180], 'Distance': 100},
+       'Level Favourite Custom Colours': [
+            'InvalidColour',
+            'InvalidColour',
+            'InvalidColour',
+            'InvalidColour',
+            'InvalidColour'
+    ],
        'Floors': [{}]
        }
 
 
 def rgb_to_hex(rgb: tuple[int, int, int] | tuple[int, ...]):
-    return '#{:02x}{:02x}{:02x}'.format(*rgb).upper()
+    return '#{:02x}{:02x}{:02x}'.format(*rgb)
 
 
 def closest_colour(requested_colour: tuple[int, int, int]):
