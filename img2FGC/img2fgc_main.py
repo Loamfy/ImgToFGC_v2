@@ -110,7 +110,7 @@ class Img2FGC:
         self.template['Floors'] = list(self.pixels)
         self.finished_json = self.template
         with open(FGC_json, 'a') as f:
-            json.dump(self.finished_json, f, ensure_ascii=False, indent=4)
+            json.dump(self.finished_json, f, ensure_ascii=False)
 
     def _resize_image(self) -> Image.Image:
         try:
