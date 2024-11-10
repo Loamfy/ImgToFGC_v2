@@ -3,11 +3,11 @@ Convert image to Fall Guys Creative Level! <br>
 NOTE: Although I don’t believe that you can get banned for this, but be careful!
 
 ## Examples
-<img src="https://github.com/repinek/ImgToFGC/assets/137826826/b37c4ddf-8d96-4174-bb7e-6a512e7cf5da" width="400" height="225"/>
-<img src="https://github.com/repinek/ImgToFGC/assets/137826826/6f4ba9e7-51b3-4f4d-8bf0-b6434ea79287" width="314" height="225"/>
+<img src="https://raw.githubusercontent.com/Loamfy/img2FGC_v2/refs/heads/dev/Example/obed.png" width="400" height="225"/>
+<img src="https://raw.githubusercontent.com/Loamfy/img2FGC_v2/refs/heads/dev/Example/origObed.png" width="314" height="225"/>
 <br>
-<img src="https://github.com/repinek/ImgToFGC/assets/137826826/5e065e81-686a-48ce-8fbb-12f5cc6b182f" width="400" height="225"/>
-<img src="https://github.com/repinek/ImgToFGC/assets/137826826/5fde924e-ef3f-42bb-9659-bf45161691f5"/>
+<img src="https://raw.githubusercontent.com/Loamfy/img2FGC_v2/refs/heads/dev/Example/AngryBirdsRed.png" width="400" height="225"/>
+<img src="https://raw.githubusercontent.com/Loamfy/img2FGC_v2/refs/heads/dev/Example/origRed.png"/>
 
 ## Question and answers 
 Can I get banned using this?
@@ -26,7 +26,7 @@ If you want to find out the HEX code, there are two ways to do this:
 1. Python 3
 2. Run install_requirements.bat
 - Exe version
-1. FallGuysTools for load json map (not necessary if you know how to load map)
+1. FallGuysTools to load json map (not necessary if you know how to load map)
 
 ## Features 
 - Convert image to Fall Guys Creative 
