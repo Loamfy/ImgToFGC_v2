@@ -3,11 +3,11 @@ Convert image to Fall Guys Creative Level! <br>
 NOTE: Although I don’t believe that you can get banned for this, but be careful!
 
 ## Examples
-<img src="https://raw.githubusercontent.com/Loamfy/img2FGC_v2/refs/heads/dev/Example/obed.png" width="400" height="225"/>
-<img src="https://raw.githubusercontent.com/Loamfy/img2FGC_v2/refs/heads/dev/Example/origObed.png" width="314" height="225"/>
+<img src="https://raw.githubusercontent.com/Loamfy/img2FGC_v2/refs/heads/Releases/Example/obed.png" width="400" height="225"/>
+<img src="https://raw.githubusercontent.com/Loamfy/img2FGC_v2/refs/heads/Releases/Example/origObed.png" width="314" height="225"/>
 <br>
-<img src="https://raw.githubusercontent.com/Loamfy/img2FGC_v2/refs/heads/dev/Example/AngryBirdsRed.png" width="400" height="225"/>
-<img src="https://raw.githubusercontent.com/Loamfy/img2FGC_v2/refs/heads/dev/Example/origRed.png"/>
+<img src="https://raw.githubusercontent.com/Loamfy/img2FGC_v2/refs/heads/Releases/Example/AngryBirdsRed.png" width="400" height="225"/>
+<img src="https://raw.githubusercontent.com/Loamfy/img2FGC_v2/refs/heads/Releases/Example/origRed.png"/>
 
 ## Question and answers 
 Can I get banned using this?
