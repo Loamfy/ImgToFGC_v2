@@ -115,6 +115,7 @@ class Img2FGC:
     def _resize_image(self) -> Image.Image:
         try:
             image = Image.open(self.path_to_file)
+            image = image.transpose(method=Image.Transpose.FLIP_LEFT_RIGHT)
         except OSError:
             self.__on_error(f'Didn\'t found image with path {self.path_to_file}\n')
         except Exception as e:
