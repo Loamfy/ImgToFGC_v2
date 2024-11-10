@@ -194,6 +194,8 @@ class Img2FGC:
                         f'RGB: {pixel}, alpha: {a}, color name: {closest_name}, color index: {closest_value}, POS X: {posx}, POS Y: {posy}')
 
     def start(self):
+        if os.path.exists(FGC_json):
+            os.remove(FGC_json)
         print(
             'After [light_green]5 seconds[/light_green] map should start generating, you will see some debug info (BETA)\n'
             'If you get some errors report about them to Loamfy, thanks')
