@@ -251,7 +251,7 @@ kek = {'Version': 'V1',
        'Level Published': False,
        'LevelNameIsCustom': False,
        'LevelDescriptionIsCustom': False,
-       'Camera': {'Position': [-9.66126, 65, -176.04482], 'Pitch and Yaw': [28.690294, 1.6673589], 'Distance': 100},
+       'Camera': {'Position': [140, 225, 160], 'Pitch and Yaw': [90, 180], 'Distance': 100},
        'Level Favourite Custom Colours': [
             'InvalidColour',
             'InvalidColour',
